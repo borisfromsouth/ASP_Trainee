@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "MCVQP1zKCfRpUAFUc9OFRmToAh6vx4KsIPF7x20DMU5RTtLj3vplQf2+pis3er/RjUzdCEXW/JbiMjRZqwk2SA==",
+  "success": true,
+  "projectFilePath": "D:\\Asp_Projects\\FirstApi2\\FirstApi2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\bootstrap\\5.1.3\\bootstrap.5.1.3.nupkg.sha512"
+  ],
+  "logs": []
+}
