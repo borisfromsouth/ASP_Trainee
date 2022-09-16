@@ -1,20 +1,30 @@
 ﻿namespace FirstApi2.Classes
 {
-    interface ITimeService
+    public interface ITimeService
     {
         string GetTime();
     }
 
+    public interface ITimer
+    {
+        string Time { get; }
+    }
+
     public class TimeService
     {
-        public string Time { get; }
-
-        public TimeService()
+        //public string Time { get; }
+        private ITimer timer;
+        public TimeService(ITimer timer)
         {
-            Time = DateTime.Now.ToLongTimeString();
+            this.timer = timer;
         }
 
-        //public string GetTime() => DateTime.Now.ToShortTimeString();
+        //public TimeService()
+        //{
+        //    Time = DateTime.Now.ToLongTimeString();
+        //}
+
+        public string GetTime() => timer.Time;
     }
 
     // время в формате hh:mm:ss
@@ -29,7 +39,7 @@
         public string GetTime() => DateTime.Now.ToShortTimeString();
     }
 
-    class TimeMessage
+    public class TimeMessage
     {
         ITimeService timeService;
         public TimeMessage(ITimeService timeService)
@@ -39,7 +49,7 @@
         public string GetTime() => $"Time: {timeService.GetTime()}";
     }
 
-    class TimeMessageMiddleware
+    public class TimeMessageMiddleware
     {
         private readonly RequestDelegate next;
 
@@ -55,28 +65,51 @@
         }
     }
 
-    class TimerMiddleware
+    public class TimerMiddleware
     {
-        RequestDelegate next;
-        TimeService timeService;
+        //RequestDelegate next;
+        ////TimeService timeService; 
 
-        public TimerMiddleware(RequestDelegate next/*, TimeService timeService*/) // так как в сервисы подключен TimeService то его объет передастся сюда
+        //public TimerMiddleware(RequestDelegate next/*, TimeService timeService*/) // так как в сервисы подключен TimeService то его объет передастся сюда
+        //{
+        //    this.next = next;
+        //    //this.timeService = timeService;
+        //}
+
+        //public async Task InvokeAsync(HttpContext context, TimeService timeService) // для получения свежих данных надо передавать объект во входные параметры 
+        //{
+        //    if (context.Request.Path == "/time")
+        //    {
+        //        context.Response.ContentType = "text/html; charset=utf-8";
+        //        await context.Response.WriteAsync($"Текущее время: {timeService?.Time}");  // время будет одно и то же при повторном запросе, так как объект timeService закидывается сюда единожды
+        //    }
+        //    else
+        //    {
+        //        await next.Invoke(context);
+        //    }
+        //}
+
+        ///// Другая реализация ///////
+
+        TimeService timeService;
+        public TimerMiddleware(RequestDelegate next, TimeService timeService)
         {
-            this.next = next;
-            //this.timeService = timeService;
+            this.timeService = timeService;
         }
 
-        public async Task InvokeAsync(HttpContext context, TimeService timeService) // для получения свежих данных надо передавать объект во входные параметры 
+        public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path == "/time")
-            {
-                context.Response.ContentType = "text/html; charset=utf-8";
-                await context.Response.WriteAsync($"Текущее время: {timeService?.Time}");  // время будет одно и то же при повторном запросе, так как объект timeService создается единожды
-            }
-            else
-            {
-                await next.Invoke(context);
-            }
+            await context.Response.WriteAsync($"Time: {timeService?.GetTime()}");
+        }
+    }
+
+    public class Timer : ITimer
+    { 
+        public string Time { get; }
+
+        public Timer()
+        {
+            Time = DateTime.Now.ToLongTimeString();
         }
     }
 }
