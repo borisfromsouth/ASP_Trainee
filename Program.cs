@@ -1,4 +1,5 @@
 using FirstApi2.Classes;
+using Microsoft.Extensions.FileProviders;
 using System.Text;
 using System.Text.RegularExpressions;
 using Timer = FirstApi2.Classes.Timer;
@@ -48,9 +49,11 @@ var builder = WebApplication.CreateBuilder();
 //builder.Services.AddSingleton<IGenerator>(serv => serv.GetRequiredService<ValueStorage>()); // находим объект в сервисах и устанавливаем для реализации на два интерфейса, таким образом мы используем один и тот же оъект в двух местах гыыгыгыыыг
 //builder.Services.AddSingleton<IReader>(serv => serv.GetRequiredService<ValueStorage>());
 
-builder.Services.AddRouting(options => options.ConstraintMap.Add("secretcode" /*ключ ограничения*/, typeof(SecretCodeConstraint)/*класс ограничения*/)); // сервис по проверка маршрута; ConstraintMap - коллекция ограничений 
+//builder.Services.AddRouting(options => options.ConstraintMap.Add("secretcode" /*ключ ограничения*/, typeof(SecretCodeConstraint)/*класс ограничения*/)); // сервис по проверка маршрута; ConstraintMap - коллекция ограничений 
 
-builder.Services.AddRouting(options => options.ConstraintMap.Add("invalidnames" , typeof(InvalidNamesConstraint)));
+//builder.Services.AddRouting(options => options.ConstraintMap.Add("invalidnames" , typeof(InvalidNamesConstraint)));
+
+//builder.Services.AddTransient<TimeService2>();
 
 var app = builder.Build();
 
@@ -132,16 +135,154 @@ var app = builder.Build();
 //    (string phone) => $"Phone: {phone}"
 //);
 
-app.Map(
-    "/users/{name}/{token:int:secretcode(123466)}",  // передача значения 123466 по ключу secretcode в конструктор класса SecretCodeConstraint
-    (string name, int token) => $"User Name:{name} \nToken:{token}"
-);
-app.Map(
-    "/users/{name:invalidnames}",  // передача значения 123466 по ключу secretcode в конструктор класса SecretCodeConstraint
-    (string name) => $"User Name:{name}"
-);
+//app.Map(
+//    "/users/{name}/{token:int:secretcode(123466)}",  // передача значения 123466 по ключу secretcode в конструктор класса SecretCodeConstraint
+//    (string name, int token) => $"User Name:{name} \nToken:{token}"
+//);
+//app.Map(
+//    "/users/{name:invalidnames}",  // передача значения 123466 по ключу secretcode в конструктор класса SecretCodeConstraint
+//    (string name) => $"User Name:{name}"
+//);
 
+//app.Map("/time",(TimeService2 timeService) => $"Time: {timeService.Time}");
+//app.Map("/", () => "Hello");
 
+//app.Map("/hello", () => "Hello METANIT.COM");                       // если ввести /hello то подойдут оба шаблона, но первый статичный, а второй общий динамический, поэтому приоритет за первым, он и отработает 
+//app.Map("/{message}", (string message) => $"Message: {message}");
+
+//app.Map("/{message?}", (string? message) => $"Message: {message}"); // такая же ситуация как и с прошлым, на пустой шаблон отработает второй так как он статичесий 
+//app.Map("/", () => "Index Page");
+
+//app.Map("/{controller}/Index/5", (string controller) => $"Controller: {controller}"); // преимущество будет у шаблона с первым статичесим сегментом то есть второй случай
+//app.Map("/Home/{action}/{id}", (string action) => $"Action: {action}");
+
+/////////////////////////////////////////////////////////
+
+//app.Use(async (context, next) =>
+//{
+//    Console.WriteLine("First middleware starts");
+//    await next.Invoke();
+//    Console.WriteLine("First middleware ends");
+//});
+//app.Map("/", () =>
+//{
+//    Console.WriteLine("Index endpoint starts and ends");
+//    return "Index Page";
+//});
+//app.Use(async (context, next) =>
+//{
+//    Console.WriteLine("Second middleware starts");
+//    await next.Invoke();
+//    Console.WriteLine("Second middleware ends");
+//});
+//app.Map("/about", () =>
+//{
+//    Console.WriteLine("About endpoint starts and ends");
+//    return "About Page";
+//});
+
+// Итог выполнения будет:   "Index endpoint starts and ends"
+// В консоль выведется:     "First middleware starts"        
+//                          "Second middleware starts"
+//                          "Index endpoint starts and ends"     конечная точка выполняется тольок когда начнется выполнение всех middleware
+//                          "Second middleware ends"
+//                          "First middleware ends"
+
+/////////////////////////////////////////////////////////
+
+//app.Use(async (context, next) =>   // в компонентах middleware также можно обрабатывать запросы по определенным адресам
+//{
+//    if (context.Request.Path == "/date")
+//        await context.Response.WriteAsync($"Date: {DateTime.Now.ToShortDateString()}");
+//    else
+//        await next.Invoke();
+//});
+
+//app.Use(async (context, next) =>
+//{
+//    await next.Invoke();
+
+//    if (context.Response.StatusCode == 404)                 // кейс для  постдействия - выполнения некоторых действий,когда ни одна из конечных точек не обработала запрос, и в middleware мы можем обработать эту ситуацию
+//        await context.Response.WriteAsync("Resource Not Found");
+//});
+
+/////////////////////////////////////////////////////////
+
+//app.Map("/", () => "Index Page");
+//app.Map("/about", () => "About Page");
+
+//app.Run(async context =>  // если в конце конвейера располагается терминальный компонент, то он будет выполняться даже если конечная точка соответствует запрошенному пути
+//{
+//    context.Response.StatusCode = 404;
+//    await context.Response.WriteAsync("Resource not found");
+//});
+
+/////////////////////////////////////////////////////////
+
+app.UseStaticFiles();   // добавляем поддержку статических файлов  // теперь если мы обратимся по адресу /index.html то авктивируется этот файл (лежит в папке wwwroot)
+                        // если бы файл еще лежал в папке html то мы бы обращались к нему по адресу /html/index.html
+                        // если хотим поменять корневую папку: var builder = WebApplication.CreateBuilder(new WebApplicationOptions { WebRootPath = "static" });  // изменяем папку для хранения статики через свойство WebRootPath на папку с именем static
+app.Run(async (context) => await context.Response.WriteAsync("Hello World"));
+
+/////////////////////////////////////////////////////////
+
+app.UseDefaultFiles();  // поддержка страниц html по умолчанию    // при отправке запроса к корню типа http://localhost:xxxx/ приложение будет искать в  wwwroot  файлы : default.htm, default.html, index.htm, index.html
+
+// если же мы хотим использовать файл, название которого отличается от вышеперечисленных
+DefaultFilesOptions options = new DefaultFilesOptions();
+options.DefaultFileNames.Clear(); // удаляем имена файлов по умолчанию
+options.DefaultFileNames.Add("hello.html"); // добавляем новое имя файла   // в качестве страницы по умолчанию будет использоваться файл hello.html, который должен располагаться в папке wwwroot
+app.UseDefaultFiles(options); // установка параметров
+
+app.UseStaticFiles();
+
+app.Run(async (context) => await context.Response.WriteAsync("Hello World"));
+
+/////////////////////////////////////////////////////////
+
+app.UseDirectoryBrowser(); // позволяет пользователям просматривать содержимое каталогов на сайте
+
+//  +
+
+app.UseDirectoryBrowser(new DirectoryBrowserOptions()  // вариант с перегрузкой (ввел путь => получил определенный файл на жестком диске (задается в теле метода))
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\html")),  // путь к файлу который надо получить 
+
+    RequestPath = new PathString("/pages")  // необходимый вводимый путь для получения файла  //путь типа http://localhost:xxxx/pages/ будет сопоставляться с каталогом "wwwroot\html"
+});
+
+/////////////////////////////////////////////////////////
+
+app.UseStaticFiles();  // обрабатывает запросы к файлам в папке wwwroot
+
+app.UseStaticFiles(new StaticFileOptions()  // а этот уже обрабатывает запросы по пути http://localhost:xxxx/pages к каталогу wwwroot/html
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\html")),  // путь к файлу который надо получить 
+
+    RequestPath = new PathString("/pages")  // необходимый вводимый путь для получения файла
+});
+
+/////////////////////////////////////////////////////////
+
+app.UseFileServer(); // объединяет функциональность UseStaticFiles, UseDefaultFiles и UseDirectoryBrowser;  позволяет обрабатывать статические файлы и отправлять файлы по умолчанию типа index.html
+
+app.UseFileServer(enableDirectoryBrowsing: true); // подключение через свойства просмотра каталогов
+
+app.UseFileServer(new FileServerOptions  // более точное опеределение параметров
+{
+    EnableDirectoryBrowsing = true,
+    EnableDefaultFiles = false
+});
+
+app.UseFileServer(new FileServerOptions  // настройка сопоставления путей запроса с каталогами  //разрешен обзор каталога по пути http://localhost:xxxx/pages/, но при этом путь http://localhost:xxxx/html/ работать не будет
+{
+    EnableDirectoryBrowsing = true,
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\html")), // тут
+    RequestPath = new PathString("/pages"),                                                                  // и тут
+    EnableDefaultFiles = false
+});
+
+/////////////////////////////////////////////////////////
 
 //app.Run(async context =>
 //{

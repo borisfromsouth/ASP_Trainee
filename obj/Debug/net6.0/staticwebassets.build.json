@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "e1S+dLmgR9w3XPU48DDbHO42pT1ska0Eu9xMR2s95Xc=",
+  "Hash": "01JGXbsJ2V8yV2aPca47hiqLHrvS6Qibsp6sE/xw/HI=",
   "Source": "FirstApi2",
   "BasePath": "_content/FirstApi2",
   "Mode": "Default",
@@ -831,6 +831,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "D:\\Asp_Projects\\FirstApi2\\wwwroot\\index.html",
+      "SourceId": "FirstApi2",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Asp_Projects\\FirstApi2\\wwwroot\\",
+      "BasePath": "_content/FirstApi2",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
     },
     {
       "Identity": "D:\\Asp_Projects\\FirstApi2\\wwwroot\\js\\site.js",

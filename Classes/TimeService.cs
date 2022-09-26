@@ -27,6 +27,11 @@
         public string GetTime() => timer.Time;
     }
 
+    public class TimeService2
+    {
+        public string Time => DateTime.Now.ToLongTimeString();
+    }
+
     // время в формате hh:mm:ss
     public class LongTimeService : ITimeService
     {
